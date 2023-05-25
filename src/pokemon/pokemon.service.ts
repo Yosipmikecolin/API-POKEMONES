@@ -71,16 +71,16 @@ export class PokemonService {
   }
 
   //FUNCTIONS
-  private handleExceptions(error: any) {
+  public handleExceptions(error: any) {
     if (error.code === 11000) {
       throw new BadRequestException(
         `Pokemon exist in db: ${JSON.stringify(error.keyValue)}`,
       );
     } else {
+      console.log(error);
       throw new InternalServerErrorException(
         "Couldn't updated pokemon - check console",
       );
-      console.log(error);
     }
   }
 }
