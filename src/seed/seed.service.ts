@@ -20,7 +20,7 @@ export class SeedService {
     await this.PokemonModel.deleteMany({});
     const arrayPromises = [];
     const data = await this.http.get<IPokemon>(
-      'https://pokeapi.co/api/v2/pokemon?limit=600',
+      'https://pokeapi.co/api/v2/pokemon?limit=100',
     );
     data.results.forEach(({ name, url }) => {
       const segments = url.split('/');
