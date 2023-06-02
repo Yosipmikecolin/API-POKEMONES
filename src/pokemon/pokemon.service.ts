@@ -3,23 +3,29 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
-import { Model, isValidObjectId } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { PaginationDTO } from './dto/pagination.dto';
 
 @Injectable()
 export class PokemonService {
+  private defaultLimit: number;
   constructor(
     @InjectModel(Pokemon.name)
-    private readonly PokemonModule: Model<Pokemon>,
-  ) {}
+    private readonly PokemonModel: Model<Pokemon>,
+    private readonly configService: ConfigService,
+  ) {
+    this.defaultLimit = this.configService.get<number>('dafaultLimit');
+  }
 
   //CREATE POKEMON
   async create(createPokemonDto: CreatePokemonDto) {
     try {
-      const pokemon = await this.PokemonModule.create(createPokemonDto);
+      const pokemon = await this.PokemonModel.create(createPokemonDto);
       return pokemon;
     } catch (error) {
       this.handleExceptions(error);
@@ -27,8 +33,13 @@ export class PokemonService {
   }
 
   //GET ALL POKEMONS
-  findAll() {
-    return `This action returns all pokemon`;
+  findAll(querys: PaginationDTO) {
+    const { limit = this.defaultLimit, offset = 0 } = querys;
+    return this.PokemonModel.find()
+      .limit(limit)
+      .skip(offset)
+      .select('-__v')
+      .sort({ no: 1 });
   }
 
   //GET UN POKEMON
@@ -36,11 +47,11 @@ export class PokemonService {
     let pokemon: Pokemon;
     //numero
     if (!isNaN(+term)) {
-      pokemon = await this.PokemonModule.findOne({ no: term });
+      pokemon = await this.PokemonModel.findOne({ no: term });
     } else {
       pokemon =
-        (await this.PokemonModule.findOne({ name: term })) ??
-        (await this.PokemonModule.findById(term));
+        (await this.PokemonModel.findOne({ name: term })) ??
+        (await this.PokemonModel.findById(term));
     }
 
     if (!pokemon) {

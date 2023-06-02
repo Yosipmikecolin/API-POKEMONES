@@ -1,30 +1,25 @@
-import {
-  Injectable,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Pokemon } from 'src/pokemon/entities/pokemon.entity';
 import { IPokemon } from './interfaces/pokemon.interface';
-import { PokemonService } from 'src/pokemon/pokemon.service';
+import { AxiosAdapter } from 'src/common/adapters/axios.dapater';
 
 @Injectable()
 export class SeedService {
   constructor(
     @InjectModel(Pokemon.name) private readonly PokemonModel: Model<Pokemon>,
-    private PokemonService: PokemonService,
+    private readonly http: AxiosAdapter,
   ) {}
 
   //VARIABLES
-  private readonly axios: AxiosInstance = axios;
+  //private readonly axios: AxiosInstance = axios;
 
   //METODOS
   async executeSeed() {
     await this.PokemonModel.deleteMany({});
     const arrayPromises = [];
-    const { data } = await this.axios.get<IPokemon>(
+    const data = await this.http.get<IPokemon>(
       'https://pokeapi.co/api/v2/pokemon?limit=600',
     );
     data.results.forEach(({ name, url }) => {
