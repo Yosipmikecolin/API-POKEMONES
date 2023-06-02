@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Esta API esta desarrollada con Nest.js usando una base de datos no relacional como (mongodb) su estructura es perfecta para APIS de producción
 
 ## Installation
 
